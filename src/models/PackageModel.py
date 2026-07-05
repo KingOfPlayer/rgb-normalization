@@ -147,7 +147,7 @@ class PackageExecutor2Response(Response):
 
 # Executor Configs
 class PackageExecutor1(Config):
-    name: Literal["Package"] = "PackageExecutor1"
+    name: Literal["PackageExecutor1"] = "PackageExecutor1"
     value: Union[PackageExecutor1Request, PackageExecutor1Response]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
@@ -161,7 +161,7 @@ class PackageExecutor1(Config):
         }
 
 class PackageExecutor2(Config):
-    name: Literal["Package"] = "PackageExecutor2"
+    name: Literal["PackageExecutor2"] = "PackageExecutor2"
     value: Union[PackageExecutor2Request, PackageExecutor2Response]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
