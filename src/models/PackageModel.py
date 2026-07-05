@@ -21,6 +21,14 @@ class OutputImage(Output):
     class Config:
         title  = "Image"
 
+class InputImage2(Input):
+    name: Literal["inputImage2"] = "inputImage2"
+    value: Union[List[Image],Image]
+    type: str = "object"
+
+    class Config:
+        title  = "Image"
+
 # Config Field
 class PackageExecutor1DemoOption1(Config):
     name: Literal["True"] = "True"
@@ -29,7 +37,7 @@ class PackageExecutor1DemoOption1(Config):
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Option False"
+        title = "Executor 1 Option False"
 
 
 class PackageExecutor1DemoOption2(Config):
@@ -39,15 +47,44 @@ class PackageExecutor1DemoOption2(Config):
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Option True"
+        title = "Executor 1 Option True"
     
 
 class PackageExecutor1DemoOption(Config):
     """
-        Demo Option
+        Executor 1 Demo Option
     """
     name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
     value: Union[PackageExecutor1DemoOption1, PackageExecutor1DemoOption2]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+
+
+class PackageExecutor2DemoOption1(Config):
+    name: Literal["True"] = "True"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Executor 2 Option False"
+
+
+class PackageExecutor2DemoOption2(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Executor 2 Option True"
+
+class PackageExecutor2DemoOption(Config):
+    """
+        Executor 2 Demo Option
+    """
+    name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
+    value: Union[PackageExecutor2DemoOption1, PackageExecutor2DemoOption2]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
@@ -55,9 +92,16 @@ class PackageExecutor1DemoOption(Config):
 class PackageExecutor1Inputs(Inputs):
     inputImage: InputImage
 
+class PackageExecutor2Inputs(Inputs):
+    inputImage: InputImage
+    inputImage2: InputImage2
+
 # Input Configs
 class PackageExecutor1Configs(Configs):
     demoOption: PackageExecutor1DemoOption
+
+class PackageExecutor2Configs(Configs):
+    demoOption: PackageExecutor2DemoOption
 
 # Output
 class PackageExecutor1Outputs(Outputs):
@@ -67,6 +111,15 @@ class PackageExecutor1Outputs(Outputs):
 class PackageExecutor1Request(Request):
     inputs: Optional[PackageExecutor1Inputs]
     configs: PackageExecutor1Configs
+
+    class Configs:
+        json_schema_extra = {
+            "target": "value"
+        }
+
+class PackageExecutor2Request(Request):
+    inputs: Optional[PackageExecutor2Inputs]
+    configs: PackageExecutor2Configs
 
     class Configs:
         json_schema_extra = {
