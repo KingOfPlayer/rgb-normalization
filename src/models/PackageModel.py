@@ -29,6 +29,14 @@ class InputImage2(Input):
     class Config:
         title  = "Image"
 
+class OutputImage2(Output):
+    name: Literal["outputImage2"] = "outputImage2"
+    value: Union[List[Image],Image]
+    type: str = "object"
+
+    class Config:
+        title  = "Image"
+
 # Config Field
 class PackageExecutor1DemoOption1(Config):
     name: Literal["True"] = "True"
@@ -107,6 +115,10 @@ class PackageExecutor2Configs(Configs):
 class PackageExecutor1Outputs(Outputs):
     outputImage: OutputImage
 
+class PackageExecutor2Outputs(Outputs):
+    outputImage: OutputImage
+    outputImage2: OutputImage2
+
 # Executor Requests
 class PackageExecutor1Request(Request):
     inputs: Optional[PackageExecutor1Inputs]
@@ -129,6 +141,9 @@ class PackageExecutor2Request(Request):
 # Executor Responses
 class PackageExecutor1Response(Response):
     outputs: PackageExecutor1Outputs
+
+class PackageExecutor2Response(Response):
+    Outputs: PackageExecutor2Outputs
 
 # Executor Configs
 class PackageExecutor1(Config):
