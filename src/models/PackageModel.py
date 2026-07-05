@@ -85,17 +85,31 @@ class PackageExecutor1(Config):
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "PackageExecutor1"
         json_schema_extra = {
             "target": {
                 "value": 0
             }
         }
 
+class PackageExecutor2(Config):
+    name: Literal["Package"] = "PackageExecutor2"
+    value: Union[PackageExecutor2Request, PackageExecutor2Response]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "PackageExecutor2"
+        json_schema_extra = {
+            "target": {
+                "value": 1
+            }
+        }
+
 # Root Package Configs
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor1]
+    value: Union[PackageExecutor1, PackageExecutor2]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
