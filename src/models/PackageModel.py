@@ -170,7 +170,7 @@ class PackageExecutor2(Config):
         title = "PackageExecutor2"
         json_schema_extra = {
             "target": {
-                "value": 1
+                "value": 0
             }
         }
 
