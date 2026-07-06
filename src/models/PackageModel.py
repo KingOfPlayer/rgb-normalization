@@ -40,7 +40,7 @@ class OutputImage2(Output):
 # Config Field
 class PackageExecutor1DemoOption1(Config):
     name: Literal["True"] = "True"
-    value: Literal[False] = False
+    value: Literal["False"] = "False"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
@@ -50,7 +50,7 @@ class PackageExecutor1DemoOption1(Config):
 
 class PackageExecutor1DemoOption2(Config):
     name: Literal["True"] = "True"
-    value: Literal[True] = True
+    value: Literal["True"] = "True"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
@@ -65,12 +65,18 @@ class PackageExecutor1DemoOption(Config):
     name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
     value: Union[PackageExecutor1DemoOption1, PackageExecutor1DemoOption2]
     type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Demo Option 1"
+        json_schema_extra = {
+            "shortDescription": "Executor 1 Demo Option"
+        }
 
 
 class PackageExecutor2DemoOption1(Config):
     name: Literal["True"] = "True"
-    value: Literal[False] = False
+    value: Literal["False"] = "False"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
@@ -80,12 +86,13 @@ class PackageExecutor2DemoOption1(Config):
 
 class PackageExecutor2DemoOption2(Config):
     name: Literal["True"] = "True"
-    value: Literal[True] = True
+    value: Literal["True"] = "True"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Executor 2 Option True"
+
 
 class PackageExecutor2DemoOption(Config):
     """
@@ -94,7 +101,13 @@ class PackageExecutor2DemoOption(Config):
     name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
     value: Union[PackageExecutor2DemoOption1, PackageExecutor2DemoOption2]
     type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+
+    class Config:
+        title = "Demo Option 2"
+        json_schema_extra = {
+            "shortDescription": "Executor 2 Demo Option"
+        }
 
 # Inputs
 class PackageExecutor1Inputs(Inputs):
@@ -121,21 +134,21 @@ class PackageExecutor2Outputs(Outputs):
 
 # Executor Requests
 class PackageExecutor1Request(Request):
-    inputs: Optional[PackageExecutor1Inputs]
+    inputs: Optional[PackageExecutor1Inputs] = None
     configs: PackageExecutor1Configs
 
     class Configs:
         json_schema_extra = {
-            "target": "value"
+            "target": "configs"
         }
 
 class PackageExecutor2Request(Request):
-    inputs: Optional[PackageExecutor2Inputs]
+    inputs: Optional[PackageExecutor2Inputs] = None
     configs: PackageExecutor2Configs
 
     class Configs:
         json_schema_extra = {
-            "target": "value"
+            "target": "configs"
         }
 
 # Executor Responses
@@ -143,10 +156,13 @@ class PackageExecutor1Response(Response):
     outputs: PackageExecutor1Outputs
 
 class PackageExecutor2Response(Response):
-    Outputs: PackageExecutor2Outputs
+    outputs: PackageExecutor2Outputs
 
 # Executor Configs
 class PackageExecutor1(Config):
+    """
+        PackageExecutor1
+    """
     name: Literal["PackageExecutor1"] = "PackageExecutor1"
     value: Union[PackageExecutor1Request, PackageExecutor1Response]
     type: Literal["object"] = "object"
@@ -161,6 +177,9 @@ class PackageExecutor1(Config):
         }
 
 class PackageExecutor2(Config):
+    """
+        PackageExecutor2
+    """
     name: Literal["PackageExecutor2"] = "PackageExecutor2"
     value: Union[PackageExecutor2Request, PackageExecutor2Response]
     type: Literal["object"] = "object"
@@ -176,6 +195,9 @@ class PackageExecutor2(Config):
 
 # Root Package Configs
 class ConfigExecutor(Config):
+    """
+        ConfigExecutor
+    """
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[PackageExecutor1, PackageExecutor2]
     type: Literal["executor"] = "executor"
@@ -183,9 +205,6 @@ class ConfigExecutor(Config):
 
     class Config:
         title = "Task"
-        json_schema_extra = {
-            "target": "value"
-        }
 
 
 class PackageConfigs(Configs):
