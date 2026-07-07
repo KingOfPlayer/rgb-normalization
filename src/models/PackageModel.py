@@ -39,7 +39,7 @@ class OutputImage2(Output):
 
 # Config Field
 class PackageExecutor1DemoOption1(Config):
-    name: Literal["True"] = "True"
+    name: Literal["False"] = "False"
     value: Literal["False"] = "False"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
@@ -75,7 +75,7 @@ class PackageExecutor1DemoOption(Config):
 
 
 class PackageExecutor2DemoOption1(Config):
-    name: Literal["True"] = "True"
+    name: Literal["False"] = "False"
     value: Literal["False"] = "False"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
@@ -98,7 +98,7 @@ class PackageExecutor2DemoOption(Config):
     """
         Executor 2 Demo Option
     """
-    name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
+    name: Literal["PackageExecutor2DemoOption"] = "PackageExecutor2DemoOption"
     value: Union[PackageExecutor2DemoOption1, PackageExecutor2DemoOption2]
     type: Literal["object"] = "object"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
@@ -189,7 +189,7 @@ class PackageExecutor2(Config):
         title = "PackageExecutor2"
         json_schema_extra = {
             "target": {
-                "value": 0
+                "value": 1
             }
         }
 

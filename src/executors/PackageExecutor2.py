@@ -11,8 +11,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from components.Package.src.utils.response import build_response_executor_2
-from components.Package.src.models.PackageModel import PackageModel
+from components.RgbNormalization.src.utils.response import build_response_executor_2
+from components.RgbNormalization.src.models.PackageModel import PackageModel
 
 
 class PackageExecutor2(Component):
@@ -29,7 +29,12 @@ class PackageExecutor2(Component):
 
 
     def run(self):
-        # Do Someting
+        # Image1
+        img = Image.get_frame(img=self.image, redis_db=self.redis_db)
+        self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
+        # Image2
+        img2 = Image.get_frame(img=self.image2, redis_db=self.redis_db)
+        self.image2 = Image.set_frame(img=img2, package_uID=self.uID, redis_db=self.redis_db)
         packageModel = build_response_executor_2(context=self)
         return packageModel
 
