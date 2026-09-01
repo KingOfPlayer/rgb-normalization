@@ -1,5 +1,5 @@
 from sdks.novavision.src.helper.package import PackageHelper
-from ..models.PackageModel import (
+from components.CosineSimilarity.src.models.PackageModel import (
     PackageModel, 
     PackageConfigs, 
     ConfigExecutor, 
