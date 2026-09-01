@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
+
 from sdks.novavision.src.helper.package import PackageHelper
 from components.CosineSimilarity.src.models.PackageModel import (
     PackageModel, 
