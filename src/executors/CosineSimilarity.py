@@ -5,8 +5,15 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
 
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from components.CosineSimilarity.src.utils.response import build_response
-from components.CosineSimilarity.src.models.PackageModel import PackageModel
+
+try:
+    from components.CosineSimilarity.src.utils.response import build_response
+    from components.CosineSimilarity.src.models.PackageModel import PackageModel
+except ModuleNotFoundError:
+    # Update aşamasında klasör adı değişirse diye güvenlik ağı
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from src.utils.response import build_response
+    from src.models.PackageModel import PackageModel
 
 import numpy as np
 import traceback
