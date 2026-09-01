@@ -1,17 +1,15 @@
 import os
 import sys
 
-# Proje kök dizinini sys.path'e ekle (Update/Build aşamasında çökmemesi için)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
-from pydantic import ValidationError
-import numpy as np
-import traceback
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
 
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from src.utils.response import build_response
-from src.models.PackageModel import PackageModel
+from components.CosineSimilarity.src.utils.response import build_response
+from components.CosineSimilarity.src.models.PackageModel import PackageModel
+
+import numpy as np
+import traceback
 
 
 class CosineSimilarity(Component):
