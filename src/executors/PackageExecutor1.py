@@ -19,7 +19,7 @@ class PackageExecutor1(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.demo_option = self.request.get_param("PackageExecutor1DemoOption")
+        self.demo_option = self.request.get_param("demoOption")
         self.image = self.request.get_param("inputImage")
 
     @staticmethod

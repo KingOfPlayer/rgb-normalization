@@ -65,7 +65,7 @@ class PackageExecutor1DemoOption(Config):
     name: Literal["PackageExecutor1DemoOption"] = "PackageExecutor1DemoOption"
     value: Union[PackageExecutor1DemoOption1, PackageExecutor1DemoOption2]
     type: Literal["object"] = "object"
-    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
         title = "Demo Option 1"
@@ -101,7 +101,7 @@ class PackageExecutor2DemoOption(Config):
     name: Literal["PackageExecutor2DemoOption"] = "PackageExecutor2DemoOption"
     value: Union[PackageExecutor2DemoOption1, PackageExecutor2DemoOption2]
     type: Literal["object"] = "object"
-    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
         title = "Demo Option 2"
@@ -189,7 +189,7 @@ class PackageExecutor2(Config):
         title = "PackageExecutor2"
         json_schema_extra = {
             "target": {
-                "value": 1
+                "value": 0
             }
         }
 
