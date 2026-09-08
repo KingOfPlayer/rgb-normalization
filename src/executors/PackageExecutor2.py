@@ -13,13 +13,17 @@ from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
 from components.RgbNormalization.src.utils.response import build_response_executor_2
 from components.RgbNormalization.src.models.PackageModel import PackageModel
+import json
 
 
 class PackageExecutor2(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.demo_option = self.request.get_param("demoOption")
+        
+        # print dump the self.request 
+        print(json.dumps(self.request, indent=4))
+
         self.image = self.request.get_param("inputImage")
         self.image2 = self.request.get_param("inputImage2")
 

@@ -83,16 +83,24 @@ class PackageExecutor2DemoOption1(Config):
     class Config:
         title = "Executor 2 Option False"
 
+class CascadeField1(Config):
+    name: Literal["CascadeField1"] = "CascadeField1"
+    value: str = Field(default="")
+    type: Literal["string"] = "string"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Cascade Field 1"
 
 class PackageExecutor2DemoOption2(Config):
     name: Literal["True"] = "True"
     value: Literal["True"] = "True"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
+    cascadeField1: CascadeField1 
 
     class Config:
         title = "Executor 2 Option True"
-
 
 class PackageExecutor2DemoOption(Config):
     """
@@ -101,7 +109,7 @@ class PackageExecutor2DemoOption(Config):
     name: Literal["PackageExecutor2DemoOption"] = "PackageExecutor2DemoOption"
     value: Union[PackageExecutor2DemoOption1, PackageExecutor2DemoOption2]
     type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+    field: Literal["dropdownlist"] = "dropdownlist"  
 
     class Config:
         title = "Demo Option 2"
