@@ -1,7 +1,18 @@
+from typing import Literal
 
 from pydantic import ConfigDict
-from typing import List, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
+from sdks.novavision.src.base.model import (
+    Config,
+    Configs,
+    Image,
+    Input,
+    Inputs,
+    Output,
+    Outputs,
+    Package,
+    Request,
+    Response,
+)
 
 # region General Classes
 
@@ -29,6 +40,7 @@ class ConfigDisable(Config):
 class BaseOption(Config):
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
+
 
 # Dynamic class generation for options
 
@@ -62,33 +74,47 @@ class BaseDependentDropdown(Config):
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
     restart: Literal[True] = True
 
-# region list of models
+
+# endregion
+
+# region Base Classes
 
 
+# region List Of Models
 OptionViTB16 = make_option("ViT-B-16")
 OptionViTB32 = make_option("ViT-B-32")
 OptionRN50 = make_option("RN50")
 # endregion
 
 
-class BaseModelVersions(Config):
+class BaseModelVersions(BaseDropdown):
     name: Literal["Version"] = "Version"
-    value: Union[OptionViTB16, OptionViTB32, OptionRN50]  # pyright: ignore
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+    value: OptionViTB16 | OptionViTB32 | OptionRN50  # pyright: ignore
 
     class Config:
         title = "Version"
 
 
-class BaseNormalize(Config):
+class BaseNormalize(BaseDropdown):
     name: Literal["Normalize"] = "Normalize"
-    value: Union[ConfigDisable, ConfigEnable]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
+    value: ConfigDisable | ConfigEnable
 
     class Config:
         title = "Normalize Embedding"
+
+
+OptionCPU = make_option("CPU")
+OptionGPU = make_option("GPU")
+
+
+class BaseDevice(BaseDropdown):
+    name: Literal["Device"] = "Device"
+    value: OptionCPU | OptionGPU  # pyright: ignore
+
+    class Config:
+        title = "Device"
+
+
 # endregion
 
 # region Input-Output
@@ -96,7 +122,7 @@ class BaseNormalize(Config):
 
 class InputData(Input):
     name: Literal["inputData"] = "inputData"
-    value: Union[Image, str]
+    value: Image | str
     type: str = "object"
 
     class Config:
@@ -105,7 +131,7 @@ class InputData(Input):
 
 class OutputEmbedding(Output):
     name: Literal["outputEmbedding"] = "outputEmbedding"
-    value: List[float]
+    value: list[float]
     type: Literal["list"] = "list"
 
     class Config:
@@ -128,37 +154,30 @@ class OutputMeta(Output):
 
     class Config:
         title = "Meta"
+
+
 # endregion
 
 # region Configs
 # region ClipGenerate
 
 
-class ConfigClipGenerateVersion(BaseModelVersions):
-    pass
-
-
-class ConfigClipGenerateNormalize(BaseNormalize):
-    pass
-
-
 class ConfigClipGenerateAdvanceEnable(ConfigEnable):
-    configClipGenerateVersion: ConfigClipGenerateVersion
-    configClipGenerateNormalize: ConfigClipGenerateNormalize
+    configClipGenerateVersion: BaseModelVersions
+    configClipGenerateNormalize: BaseNormalize
+    configClipGenerateDevice: BaseDevice
 
 
 class ConfigClipGenerateAdvance(BaseDependentDropdown):
     name: Literal["Advance"] = "Advance"
-    value: Union[ConfigClipGenerateAdvanceEnable, ConfigDisable]
+    value: ConfigClipGenerateAdvanceEnable | ConfigDisable
 
     class Config:
         title = "Advance"
+
+
 # endregion
 # region ClipComparison
-
-
-class ConfigClipComparisonVersion(BaseModelVersions):
-    pass
 
 
 class ConfigClipComparisonClasses(Config):
@@ -171,44 +190,41 @@ class ConfigClipComparisonClasses(Config):
         title = "List of classes"
         json_schema_extra = {
             "class": "\\novavision\\app\\widgets\\TextList",
-            "shortDescription": "List of text entries"
+            "shortDescription": "List of text entries",
         }
 
 
 class ConfigClipComparisonAdvanceEnable(ConfigEnable):
-    configClipComparisonVersion: ConfigClipGenerateVersion
+    configClipComparisonVersion: BaseModelVersions
     configClipComparisonClasses: ConfigClipComparisonClasses
+    configClipComparisonDevice: BaseDevice
 
 
 class ConfigClipComparisonAdvance(BaseDependentDropdown):
     name: Literal["Advance"] = "Advance"
-    value: Union[ConfigClipComparisonAdvanceEnable, ConfigDisable]
+    value: ConfigClipComparisonAdvanceEnable | ConfigDisable
 
     class Config:
         title = "Advance"
+
+
 # endregion
 # region PerceptionEncoder
 
 
-class ConfigPerceptionEncoderVersion(BaseModelVersions):
-    pass
-
-
-class ConfigPerceptionEncoderNormalize(BaseNormalize):
-    pass
-
-
 class ConfigPerceptionEncoderAdvanceEnable(ConfigEnable):
-    configPerceptionEncoderVersion: ConfigPerceptionEncoderVersion
-    configPerceptionEncoderNormalize: ConfigPerceptionEncoderNormalize
+    configPerceptionEncoderVersion: BaseModelVersions
+    configPerceptionEncoderNormalize: BaseNormalize
+    configPerceptionEncoderDevice: BaseDevice
 
 
 class ConfigPerceptionEncoderAdvance(BaseDependentDropdown):
     name: Literal["Advance"] = "Advance"
-    value: Union[ConfigPerceptionEncoderAdvanceEnable, ConfigDisable]
+    value: ConfigPerceptionEncoderAdvanceEnable | ConfigDisable
 
     class Config:
         title = "Advance"
+
 
 # endregion
 # endregion
@@ -250,6 +266,8 @@ class PerceptionEncoderOutputs(Outputs):
 
 class PerceptionEncoderConfigs(Configs):
     configPerceptionEncoderAdvance: ConfigPerceptionEncoderAdvance
+
+
 # endregion
 
 # region Request-Response
@@ -260,9 +278,7 @@ class ClipGenerateRequest(Request):
     configs: ClipGenerateConfigs
 
     class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
+        json_schema_extra = {"target": "configs"}
 
 
 class ClipGenerateResponse(Response):
@@ -274,9 +290,7 @@ class ClipComparisonRequest(Request):
     configs: ClipComparisonConfigs
 
     class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
+        json_schema_extra = {"target": "configs"}
 
 
 class ClipComparisonResponse(Response):
@@ -288,13 +302,13 @@ class PerceptionEncoderRequest(Request):
     configs: PerceptionEncoderConfigs
 
     class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
+        json_schema_extra = {"target": "configs"}
 
 
 class PerceptionEncoderResponse(Response):
     outputs: PerceptionEncoderOutputs
+
+
 # endregion
 
 # region Executors
@@ -302,47 +316,37 @@ class PerceptionEncoderResponse(Response):
 
 class ClipGenerateExecutor(Config):
     name: Literal["ClipGenerate"] = "ClipGenerate"
-    value: Union[ClipGenerateRequest, ClipGenerateResponse]
+    value: ClipGenerateRequest | ClipGenerateResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Clip Generate"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
+        json_schema_extra = {"target": {"value": 0}}
 
 
 class ClipComparisonExecutor(Config):
     name: Literal["ClipComparison"] = "ClipComparison"
-    value: Union[ClipComparisonRequest, ClipComparisonResponse]
+    value: ClipComparisonRequest | ClipComparisonResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Clip Comparison"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
+        json_schema_extra = {"target": {"value": 0}}
 
 
 class PerceptionEncoderExecutor(Config):
     name: Literal["PerceptionEncoder"] = "PerceptionEncoder"
-    value: Union[PerceptionEncoderRequest, PerceptionEncoderResponse]
+    value: PerceptionEncoderRequest | PerceptionEncoderResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
         title = "Perception Encoder"
-        json_schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
+        json_schema_extra = {"target": {"value": 0}}
+
+
 # endregion
 
 # region Root Config
@@ -350,10 +354,7 @@ class PerceptionEncoderExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[
-        ClipGenerateExecutor,
-        ClipComparisonExecutor,
-        PerceptionEncoderExecutor]
+    value: ClipGenerateExecutor | ClipComparisonExecutor | PerceptionEncoderExecutor
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -369,4 +370,6 @@ class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
     name: Literal["EmbeddingExtraction"] = "EmbeddingExtraction"
+
+
 # endregion
