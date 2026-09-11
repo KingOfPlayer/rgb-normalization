@@ -1,54 +1,12 @@
 
-from pydantic import Field, validator
-from typing import List, Optional, Union, Literal
+from pydantic import ConfigDict
+from typing import List, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
-
-class InputImage(Input):
-    name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
-    class Config:
-        title = "Image"
+# region General Classes
 
 
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
-    class Config:
-        title = "Image"
-
-
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
-
-class KeepSideTrue(Config):
+class ConfigEnable(Config):
     name: Literal["True"] = "True"
     value: Literal[True] = True
     type: Literal["bool"] = "bool"
@@ -58,49 +16,248 @@ class KeepSideTrue(Config):
         title = "Enable"
 
 
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
+class ConfigDisable(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Disable"
+
+
+class BaseOption(Config):
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+# Dynamic class generation for options
+
+
+def make_option(label: str, val: str | None = None) -> type[BaseOption]:
+    val = val or label
+    clean_identifier = label.replace("-", "").replace(" ", "")
+
+    return type(
+        f"Option{clean_identifier}",
+        (BaseOption,),
+        {
+            "__annotations__": {
+                "name": Literal[val],
+                "value": Literal[val],
+            },
+            "name": val,
+            "value": val,
+            "model_config": ConfigDict(title=label),
+        },
+    )
+
+
+class BaseDropdown(Config):
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+
+
+class BaseDependentDropdown(Config):
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
+
+# region list of models
+
+
+OptionViTB16 = make_option("ViT-B-16")
+OptionViTB32 = make_option("ViT-B-32")
+OptionRN50 = make_option("RN50")
+# endregion
+
+
+class BaseModelVersions(Config):
+    name: Literal["Version"] = "Version"
+    value: Union[OptionViTB16, OptionViTB32, OptionRN50]  # pyright: ignore
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
-        title = "Keep Sides"
+        title = "Version"
 
 
-class Degree(Config):
-    """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
-    """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
+class BaseNormalize(Config):
+    name: Literal["Normalize"] = "Normalize"
+    value: Union[ConfigDisable, ConfigEnable]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
-        title = "Angle"
+        title = "Normalize Embedding"
+# endregion
+
+# region Input-Output
 
 
-class PackageInputs(Inputs):
+class InputData(Input):
+    name: Literal["inputData"] = "inputData"
+    value: Union[Image, str]
+    type: str = "object"
+
+    class Config:
+        title = "Image / Text"
+
+
+class OutputEmbedding(Output):
+    name: Literal["outputEmbedding"] = "outputEmbedding"
+    value: List[float]
+    type: Literal["list"] = "list"
+
+    class Config:
+        title = "Embedding"
+
+
+class InputImage(Input):
+    name: Literal["inputImage"] = "inputImage"
+    value: Image
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Image"
+
+
+class OutputMeta(Output):
+    name: Literal["outputMeta"] = "outputMeta"
+    value: dict
+    type: Literal["object"] = "object"
+
+    class Config:
+        title = "Meta"
+# endregion
+
+# region Configs
+# region ClipGenerate
+
+
+class ConfigClipGenerateVersion(BaseModelVersions):
+    pass
+
+
+class ConfigClipGenerateNormalize(BaseNormalize):
+    pass
+
+
+class ConfigClipGenerateAdvanceEnable(ConfigEnable):
+    configClipGenerateVersion: ConfigClipGenerateVersion
+    configClipGenerateNormalize: ConfigClipGenerateNormalize
+
+
+class ConfigClipGenerateAdvance(BaseDependentDropdown):
+    name: Literal["Advance"] = "Advance"
+    value: Union[ConfigClipGenerateAdvanceEnable, ConfigDisable]
+
+    class Config:
+        title = "Advance"
+# endregion
+# region ClipComparison
+
+
+class ConfigClipComparisonVersion(BaseModelVersions):
+    pass
+
+
+class ConfigClipComparisonClasses(Config):
+    name: Literal["Classes"] = "Classes"
+    value: str
+    type: Literal["string"] = "string"
+    field: Literal["widget"] = "widget"
+
+    class Config:
+        title = "List of classes"
+        json_schema_extra = {
+            "class": "\\novavision\\app\\widgets\\TextList",
+            "shortDescription": "List of text entries"
+        }
+
+
+class ConfigClipComparisonAdvanceEnable(ConfigEnable):
+    configClipComparisonVersion: ConfigClipGenerateVersion
+    configClipComparisonClasses: ConfigClipComparisonClasses
+
+
+class ConfigClipComparisonAdvance(BaseDependentDropdown):
+    name: Literal["Advance"] = "Advance"
+    value: Union[ConfigClipComparisonAdvanceEnable, ConfigDisable]
+
+    class Config:
+        title = "Advance"
+# endregion
+# region PerceptionEncoder
+
+
+class ConfigPerceptionEncoderVersion(BaseModelVersions):
+    pass
+
+
+class ConfigPerceptionEncoderNormalize(BaseNormalize):
+    pass
+
+
+class ConfigPerceptionEncoderAdvanceEnable(ConfigEnable):
+    configPerceptionEncoderVersion: ConfigPerceptionEncoderVersion
+    configPerceptionEncoderNormalize: ConfigPerceptionEncoderNormalize
+
+
+class ConfigPerceptionEncoderAdvance(BaseDependentDropdown):
+    name: Literal["Advance"] = "Advance"
+    value: Union[ConfigPerceptionEncoderAdvanceEnable, ConfigDisable]
+
+    class Config:
+        title = "Advance"
+
+# endregion
+# endregion
+
+# region Inputs-Ouputs-Configs
+
+
+class ClipGenerateInputs(Inputs):
+    inputData: InputData
+
+
+class ClipGenerateOutputs(Outputs):
+    outputEmbedding: OutputEmbedding
+
+
+class ClipGenerateConfigs(Configs):
+    configClipGenerateAdvance: ConfigClipGenerateAdvance
+
+
+class ClipComparisonInputs(Inputs):
     inputImage: InputImage
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+class ClipComparisonOutputs(Outputs):
+    outputMeta: OutputMeta
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
+class ClipComparisonConfigs(Configs):
+    configClipComparisonAdvance: ConfigClipComparisonAdvance
 
 
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+class PerceptionEncoderInputs(Inputs):
+    inputData: InputData
+
+
+class PerceptionEncoderOutputs(Outputs):
+    outputEmbedding: OutputEmbedding
+
+
+class PerceptionEncoderConfigs(Configs):
+    configPerceptionEncoderAdvance: ConfigPerceptionEncoderAdvance
+# endregion
+
+# region Request-Response
+
+
+class ClipGenerateRequest(Request):
+    inputs: ClipGenerateInputs
+    configs: ClipGenerateConfigs
 
     class Config:
         json_schema_extra = {
@@ -108,18 +265,49 @@ class PackageRequest(Request):
         }
 
 
-class PackageResponse(Response):
-    outputs: PackageOutputs
+class ClipGenerateResponse(Response):
+    outputs: ClipGenerateOutputs
 
 
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class ClipComparisonRequest(Request):
+    inputs: ClipComparisonInputs
+    configs: ClipComparisonConfigs
+
+    class Config:
+        json_schema_extra = {
+            "target": "configs"
+        }
+
+
+class ClipComparisonResponse(Response):
+    outputs: ClipComparisonOutputs
+
+
+class PerceptionEncoderRequest(Request):
+    inputs: PerceptionEncoderInputs
+    configs: PerceptionEncoderConfigs
+
+    class Config:
+        json_schema_extra = {
+            "target": "configs"
+        }
+
+
+class PerceptionEncoderResponse(Response):
+    outputs: PerceptionEncoderOutputs
+# endregion
+
+# region Executors
+
+
+class ClipGenerateExecutor(Config):
+    name: Literal["ClipGenerate"] = "ClipGenerate"
+    value: Union[ClipGenerateRequest, ClipGenerateResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "Clip Generate"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -127,17 +315,50 @@ class PackageExecutor(Config):
         }
 
 
+class ClipComparisonExecutor(Config):
+    name: Literal["ClipComparison"] = "ClipComparison"
+    value: Union[ClipComparisonRequest, ClipComparisonResponse]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Clip Comparison"
+        json_schema_extra = {
+            "target": {
+                "value": 0
+            }
+        }
+
+
+class PerceptionEncoderExecutor(Config):
+    name: Literal["PerceptionEncoder"] = "PerceptionEncoder"
+    value: Union[PerceptionEncoderRequest, PerceptionEncoderResponse]
+    type: Literal["object"] = "object"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Perception Encoder"
+        json_schema_extra = {
+            "target": {
+                "value": 0
+            }
+        }
+# endregion
+
+# region Root Config
+
+
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[
+        ClipGenerateExecutor,
+        ClipComparisonExecutor,
+        PerceptionEncoderExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Task"
-        json_schema_extra = {
-            "target": "value"
-        }
 
 
 class PackageConfigs(Configs):
@@ -146,5 +367,6 @@ class PackageConfigs(Configs):
 
 class PackageModel(Package):
     configs: PackageConfigs
-    type: Literal["component"] = "component"
-    name: Literal["DemoPackge"] = "DemoPackge"
+    type: Literal["capsule"] = "capsule"
+    name: Literal["EmbeddingExtraction"] = "EmbeddingExtraction"
+# endregion
