@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator, ValidationInfo
 from sdks.novavision.src.base.model import (
     Config,
     Configs,
@@ -81,18 +81,19 @@ class BaseDependentDropdown(Config):
 
 
 # region List Of Models
-OptionViTB16 = make_option("ViT-B-16")
-OptionViTB32 = make_option("ViT-B-32")
-OptionRN50 = make_option("RN50")
+# title, value: <factory_name>_<model_name>
+OptionViTB16 = make_option("ViT-B-16", "OpenClip_ViT-B-16")
+OptionViTB32 = make_option("ViT-B-32", "OpenClip_ViT-B-32")
+OptionRN50 = make_option("RN50", "OpenClip_RN50")
 # endregion
 
 
-class BaseModelVersions(BaseDropdown):
-    name: Literal["Version"] = "Version"
+class BaseModels(BaseDropdown):
+    name: Literal["ModelName"] = "ModelName"
     value: OptionViTB16 | OptionViTB32 | OptionRN50  # pyright: ignore
 
     class Config:
-        title = "Version"
+        title = "Model"
 
 
 class BaseNormalize(BaseDropdown):
@@ -103,8 +104,8 @@ class BaseNormalize(BaseDropdown):
         title = "Normalize Embedding"
 
 
-OptionCPU = make_option("CPU")
-OptionGPU = make_option("GPU")
+OptionCPU = make_option("CPU", "cpu")
+OptionGPU = make_option("GPU", "gpu")
 
 
 class BaseDevice(BaseDropdown):
@@ -125,13 +126,21 @@ class InputData(Input):
     value: Image | str
     type: str = "object"
 
+    @field_validator("type", mode="before")
+    @classmethod
+    def set_type_based_on_value(cls, v, info: ValidationInfo):
+        val = info.data.get("value") if info.data else None
+        if isinstance(val, str):
+            return "str"
+        return "object"  # Return the string "object", NOT the Image instance
+
     class Config:
         title = "Image / Text"
 
 
 class OutputEmbedding(Output):
     name: Literal["outputEmbedding"] = "outputEmbedding"
-    value: list[float]
+    value: list[float] | list[list[float]]
     type: Literal["list"] = "list"
 
     class Config:
@@ -159,18 +168,18 @@ class OutputMeta(Output):
 # endregion
 
 # region Configs
-# region ClipGenerate
+# region ClipEmbedding
 
 
-class ConfigClipGenerateAdvanceEnable(ConfigEnable):
-    configClipGenerateVersion: BaseModelVersions
-    configClipGenerateNormalize: BaseNormalize
-    configClipGenerateDevice: BaseDevice
+class ConfigClipEmbeddingAdvanceEnable(ConfigEnable):
+    configClipEmbeddingModelName: BaseModels
+    configClipEmbeddingNormalize: BaseNormalize
+    configClipEmbeddingDevice: BaseDevice
 
 
-class ConfigClipGenerateAdvance(BaseDependentDropdown):
+class ConfigClipEmbeddingAdvance(BaseDependentDropdown):
     name: Literal["Advance"] = "Advance"
-    value: ConfigClipGenerateAdvanceEnable | ConfigDisable
+    value: ConfigClipEmbeddingAdvanceEnable | ConfigDisable
 
     class Config:
         title = "Advance"
@@ -195,7 +204,7 @@ class ConfigClipComparisonClasses(Config):
 
 
 class ConfigClipComparisonAdvanceEnable(ConfigEnable):
-    configClipComparisonVersion: BaseModelVersions
+    configClipComparisonModelName: BaseModels
     configClipComparisonClasses: ConfigClipComparisonClasses
     configClipComparisonDevice: BaseDevice
 
@@ -213,7 +222,7 @@ class ConfigClipComparisonAdvance(BaseDependentDropdown):
 
 
 class ConfigPerceptionEncoderAdvanceEnable(ConfigEnable):
-    configPerceptionEncoderVersion: BaseModelVersions
+    configPerceptionEncoderModelName: BaseModels
     configPerceptionEncoderNormalize: BaseNormalize
     configPerceptionEncoderDevice: BaseDevice
 
@@ -232,16 +241,16 @@ class ConfigPerceptionEncoderAdvance(BaseDependentDropdown):
 # region Inputs-Ouputs-Configs
 
 
-class ClipGenerateInputs(Inputs):
+class ClipEmbeddingInputs(Inputs):
     inputData: InputData
 
 
-class ClipGenerateOutputs(Outputs):
+class ClipEmbeddingOutputs(Outputs):
     outputEmbedding: OutputEmbedding
 
 
-class ClipGenerateConfigs(Configs):
-    configClipGenerateAdvance: ConfigClipGenerateAdvance
+class ClipEmbeddingConfigs(Configs):
+    configClipEmbeddingAdvance: ConfigClipEmbeddingAdvance
 
 
 class ClipComparisonInputs(Inputs):
@@ -273,16 +282,16 @@ class PerceptionEncoderConfigs(Configs):
 # region Request-Response
 
 
-class ClipGenerateRequest(Request):
-    inputs: ClipGenerateInputs
-    configs: ClipGenerateConfigs
+class ClipEmbeddingRequest(Request):
+    inputs: ClipEmbeddingInputs
+    configs: ClipEmbeddingConfigs
 
     class Config:
         json_schema_extra = {"target": "configs"}
 
 
-class ClipGenerateResponse(Response):
-    outputs: ClipGenerateOutputs
+class ClipEmbeddingResponse(Response):
+    outputs: ClipEmbeddingOutputs
 
 
 class ClipComparisonRequest(Request):
@@ -314,14 +323,14 @@ class PerceptionEncoderResponse(Response):
 # region Executors
 
 
-class ClipGenerateExecutor(Config):
-    name: Literal["ClipGenerate"] = "ClipGenerate"
-    value: ClipGenerateRequest | ClipGenerateResponse
+class ClipEmbeddingExecutor(Config):
+    name: Literal["ClipEmbedding"] = "ClipEmbedding"
+    value: ClipEmbeddingRequest | ClipEmbeddingResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Clip Generate"
+        title = "Clip Embedding"
         json_schema_extra = {"target": {"value": 0}}
 
 
@@ -354,7 +363,7 @@ class PerceptionEncoderExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: ClipGenerateExecutor | ClipComparisonExecutor | PerceptionEncoderExecutor
+    value: ClipEmbeddingExecutor | ClipComparisonExecutor | PerceptionEncoderExecutor
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 

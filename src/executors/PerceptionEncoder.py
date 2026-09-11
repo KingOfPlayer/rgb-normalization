@@ -28,9 +28,9 @@ class PerceptionEncoder(Component):
         self.advance = self.request.get_param("Advance")
         self.is_advance = bool(self.advance) if self.advance is not None else False
 
-        self.version = self.request.get_param("Version") or "ViT-B-16"
+        self.model_name = self.request.get_param("ModelName") or "ViT-B-16"
         self.normalize = bool(self.request.get_param("Normalize")) if self.request.get_param("Normalize") is not None else True
-        self.device = self.request.get_param("Device") or "CPU"
+        self.device = self.request.get_param("Device") or "gpu"
 
         # 3. Pull Preloaded Assets from Bootstrap
         self.model = self.bootstrap.get("model")
@@ -41,12 +41,12 @@ class PerceptionEncoder(Component):
         bootstrap = {}
         application = Application()
 
-        version = application.get_param(config=config, name="Version") or "ViT-B-16"
-        device = application.get_param(config=config, name="Device") or "CPU"
+        model_name = application.get_param(config=config, name="ModelName") or "ViT-B-16"
+        device = application.get_param(config=config, name="Device") or "gpu"
 
         # Model initialization logic
-        # bootstrap["model"] = load_perception_model(version=version, device=device)
-        # bootstrap["processor"] = load_perception_processor(version=version)
+        # bootstrap["model"] = load_perception_model(model_name=model_name, device=device)
+        # bootstrap["processor"] = load_perception_processor(model_name=model_name)
 
         return bootstrap
 
