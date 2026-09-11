@@ -13,19 +13,44 @@ from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
 from capsules.EmbeddingExtraction.src.utils.response import build_response
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
+from sdks.novavision.src.base.application import Application
 
 
-class ClipGenerateRequest(Component):
+class ClipGenerate(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.rotation_degree = self.request.get_param("Degree")
-        self.keep_side = self.request.get_param("KeepSide")
-        self.image = self.request.get_param("inputImage")
+
+        # 1. Extract Inputs
+        self.input_data = self.request.get_param("inputData")
+
+        # 2. Extract Configs
+        self.advance = self.request.get_param("Advance")
+        self.is_advance = bool(self.advance) if self.advance is not None else False
+
+        # Parameters with fallbacks if Advance is disabled
+        self.version = self.request.get_param("Version") or "ViT-B-16"
+        self.normalize = bool(self.request.get_param("Normalize")) if self.request.get_param("Normalize") is not None else True
+        self.device = self.request.get_param("Device") or "CPU"
+
+        # 3. Pull Preloaded Assets from Bootstrap
+        self.model = self.bootstrap.get("model")
+        self.processor = self.bootstrap.get("processor")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        return {}
+        bootstrap = {}
+        application = Application()
+
+        # Extract startup configuration for heavy model loading
+        version = application.get_param(config=config, name="Version") or "ViT-B-16"
+        device = application.get_param(config=config, name="Device") or "CPU"
+
+        # Model initialization logic
+        # bootstrap["model"] = load_clip_model(version=version, device=device)
+        # bootstrap["processor"] = load_clip_processor(version=version)
+
+        return bootstrap
 
     def rotation(self, image):
         if self.keep_side == True:
