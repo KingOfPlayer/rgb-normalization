@@ -2,27 +2,16 @@ from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingSo
 import torch
 from sdks.novavision.src.base.logger import LoggerManager
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib/OpenCLIP/src/open_clip"))
+
+from open_clip import create_model_and_transforms, tokenizer
+
 logger = LoggerManager()
 
 class OpenClipSoruce(BaseEmbeddingSoruce):
-    def _Bootstrap(self):
-        global create_model_and_transforms, tokenizer
-        # Install open_clip 
-        try:
-            from open_clip import create_model_and_transforms, tokenizer
-        except ImportError:
-            
-            logger.warning("(EmbeddingExtractor) OpenClip library not found. Installing open-clip-torch")
-            import subprocess
-            import sys
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "open-clip-torch==3.3.0"]
-            )
-            from open_clip import create_model_and_transforms, tokenizer
-        
-
     def _load(self):
-        self._Bootstrap()
         logger.info(f"(EmbeddingExtractor) OpenClip Model Loading: {self.model_name} ")
         self.model, _, self.preprocess = create_model_and_transforms(
             model_name=self.model_name,

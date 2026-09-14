@@ -18,7 +18,6 @@ from capsules.EmbeddingExtraction.src.utils.response import (
 )
 from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
-from sdks.novavision.src.base.application import Application
 
 
 class ClipComparison(Component):

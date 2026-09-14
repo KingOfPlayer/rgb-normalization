@@ -1,12 +1,10 @@
-"""
-    It is one of the preprocessing components in which the image is rotated.
-"""
-
 import os
 import cv2
 import sys
+import numpy as np
+from PIL import Image as PILImage
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))
 
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
@@ -14,7 +12,6 @@ from sdks.novavision.src.helper.executor import Executor
 from capsules.EmbeddingExtraction.src.utils.response import build_perception_encoder_response
 from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
-from sdks.novavision.src.base.application import Application
 
 
 class PerceptionEncoderEmbedding(Component):
@@ -58,9 +55,18 @@ class PerceptionEncoderEmbedding(Component):
             return img_rotation
 
     def run(self):
-        img = Image.get_frame(img=self.image, redis_db=self.redis_db)
-        img.value = self.rotation(img.value)
-        self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
+        if bool(isinstance(self.input_data, dict)):
+            input_image = Image.get_frame(img=self.input_data, redis_db=self.redis_db)
+            input_image = input_image.value.astype(np.uint8)
+            input_image = PILImage.fromarray(input_image)
+            self.embedding = self.model.encode_image(
+                input_image, normalize=self.normalize
+            )
+        else:
+            self.embedding = self.model.encode_text(
+                self.input_data, normalize=self.normalize
+            )
+
         packageModel = build_perception_encoder_response(context=self)
         return packageModel
 

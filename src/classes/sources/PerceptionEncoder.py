@@ -2,45 +2,20 @@ from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingSo
 import torch
 from sdks.novavision.src.base.logger import LoggerManager
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib/PerceptionModels/"))
+
+from huggingface_hub import hf_hub_download
+import core.vision_encoder.pe as pe
+import core.vision_encoder.transforms as transforms
+
 logger = LoggerManager()
 
 class PerceptionEncoderSource(BaseEmbeddingSoruce):
-    def _bootstrap(self):
-        # Install perception-encoder library
-        import subprocess
-        import sys
-        if not self.cache_dir.exists():
-
-            #Clone the repository depth 1 to the cache_dir
-            repo_url = "https://github.com/facebookresearch/perception_models.git"
-            try: 
-                logger.warning("(EmbeddingExtractor) Cloning Perception Encoder Repository")
-                subprocess.run(["git", "clone", "--depth", "1", repo_url, str(self.cache_dir)], check=True)
-            except subprocess.CalledProcessError as e:
-                raise RuntimeError(f"Failed to clone the repository: {e}")
-        
-        libs_dir = self.cache_dir / "libs"
-        requirements_path = self.cache_dir / "requirements.txt"
-        if requirements_path.exists():
-            try:
-                logger.warning(f"(EmbeddingExtractor) Installing dependencies from requirements")
-                subprocess.run([sys.executable, "-m", "pip", "install", "-r", str(self.cache_dir / "requirements.txt"), "--target", str(libs_dir)], check=True)
-            except subprocess.CalledProcessError as e:
-                raise RuntimeError(f"Failed to install dependencies from requirements.txt: {e}")
-        else:
-            raise FileNotFoundError("requirements.txt not found")
-        
-        sys.path.append(str(self.cache_dir))
-        sys.path.append(str(libs_dir))
 
     def _load(self):
-        self._bootstrap()
-        
-        from huggingface_hub import hf_hub_download
-        import core.vision_encoder.pe as pe
-        import core.vision_encoder.transforms as transforms
-
-        self.model_cache = str(self.cache_dir / "checkpoints")
+        self.model_cache = str(self.cache_dir)
 
         print(f"(EmbeddingExtractor) Downloading PerceptionEncoder model checkpoint: {self.model_name}")
         hf_hub_download(
@@ -49,7 +24,7 @@ class PerceptionEncoderSource(BaseEmbeddingSoruce):
             local_dir=self.model_cache,
         )
         print(f"(EmbeddingExtractor) Loading PerceptionEncoder model: {self.model_name}")
-        self.model = pe.CLIP.from_config("PE-Core-B16-224", pretrained=True, checkpoint_path=str(self.cache_dir / "checkpoints" / str(self.model_name + ".pt")))
+        self.model = pe.CLIP.from_config("PE-Core-B16-224", pretrained=True, checkpoint_path=str(self.cache_dir / str(self.model_name + ".pt")))
         self.model = self.model.to("cuda" if self.device.lower() == "gpu" and torch.cuda.is_available() else "cpu")
         self.model.eval()
 

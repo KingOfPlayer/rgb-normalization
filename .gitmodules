@@ -1,9 +1,8 @@
-[submodule "src/lib/OpenCLIP"]
-	path = src/lib/OpenCLIP
-	url = https://github.com/mlfoundations/open_clip.git
-    branch = main
-
 [submodule "src/lib/PerceptionModels"]
 	path = src/lib/PerceptionModels
 	url = https://github.com/facebookresearch/perception_models.git
-    branch = main
+	branch = main
+[submodule "src/lib/OpenCLIP"]
+	path = src/lib/OpenCLIP
+	url = https://github.com/mlfoundations/open_clip.git
+	branch = main
