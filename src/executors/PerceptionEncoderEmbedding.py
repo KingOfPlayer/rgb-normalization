@@ -9,7 +9,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from capsules.EmbeddingExtraction.src.utils.response import build_perception_encoder_response
+from capsules.EmbeddingExtraction.src.utils.response import (
+    build_perception_encoder_response,
+)
 from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
 
@@ -30,29 +32,10 @@ class PerceptionEncoderEmbedding(Component):
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        return build_bootstrap(config=config, default_model_name="PerceptionEncoderEmbedding_PE-Core-B16-224")
-
-    def rotation(self, image):
-        if self.keep_side == True:
-            height, width = image.shape[:2]
-            image_center = (width / 2, height / 2)
-            rotation_arr = cv2.getRotationMatrix2D(image_center, self.rotation_degree, 1)
-            abs_cos = abs(rotation_arr[0, 0])
-            abs_sin = abs(rotation_arr[0, 1])
-            bound_w = int(height * abs_sin + width * abs_cos)
-            bound_h = int(height * abs_cos + width * abs_sin)
-            rotation_arr[0, 2] += bound_w / 2 - image_center[0]
-            rotation_arr[1, 2] += bound_h / 2 - image_center[1]
-            img_rotation = cv2.warpAffine(image, rotation_arr, (bound_w, bound_h))
-
-            return img_rotation
-
-        elif self.keep_side == False:
-            height, width = image.shape[:2]
-            rotation_arr = cv2.getRotationMatrix2D((height / 2, width / 2), self.rotation_degree, 1)
-            img_rotation = cv2.warpAffine(image, rotation_arr, (height, width))
-
-            return img_rotation
+        return build_bootstrap(
+            config=config,
+            default_model_name="PerceptionEncoderEmbedding_PE-Core-B16-224",
+        )
 
     def run(self):
         if bool(isinstance(self.input_data, dict)):

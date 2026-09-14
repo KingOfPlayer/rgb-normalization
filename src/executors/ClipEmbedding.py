@@ -9,7 +9,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../"))
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from capsules.EmbeddingExtraction.src.utils.response import build_clip_embedding_response
+from capsules.EmbeddingExtraction.src.utils.response import (
+    build_clip_embedding_response,
+)
 from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
 

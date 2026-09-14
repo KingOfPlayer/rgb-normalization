@@ -1,7 +1,7 @@
-
 from sdks.novavision.src.base.application import Application
 
-def build_bootstrap(config: dict, default_model_name: str ) -> dict:
+
+def build_bootstrap(config: dict, default_model_name: str) -> dict:
     bootstrap = {}
     application = Application()
 

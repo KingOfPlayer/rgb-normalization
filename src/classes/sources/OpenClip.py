@@ -2,10 +2,6 @@ from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingSo
 import torch
 from sdks.novavision.src.base.logger import LoggerManager
 
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib/OpenCLIP/src/open_clip"))
-
 from open_clip import create_model_and_transforms, tokenizer
 
 logger = LoggerManager()
