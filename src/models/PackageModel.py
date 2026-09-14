@@ -156,13 +156,13 @@ class InputImage(Input):
         title = "Image"
 
 
-class OutputMeta(Output):
-    name: Literal["outputMeta"] = "outputMeta"
+class OutputMetadata(Output):
+    name: Literal["outputMetadata"] = "outputMetadata"
     value: dict
     type: Literal["object"] = "object"
 
     class Config:
-        title = "Meta"
+        title = "Metadata"
 
 
 # endregion
@@ -258,7 +258,7 @@ class ClipComparisonInputs(Inputs):
 
 
 class ClipComparisonOutputs(Outputs):
-    outputMeta: OutputMeta
+    outputMetadata: OutputMetadata
 
 
 class ClipComparisonConfigs(Configs):
