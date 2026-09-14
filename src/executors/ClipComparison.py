@@ -68,35 +68,23 @@ class ClipComparison(Component):
         image_embedding = self.model.encode_image(input_image, normalize=self.normalize)
         text_embeddings = self.model.encode_text(text_classes, normalize=self.normalize)
 
-        # 1. Compute raw similarities
-
-        # 1. Compute raw similarities
         raw_similarities = np.dot(text_embeddings, image_embedding.squeeze())
         similarities_0_to_1 = np.clip(raw_similarities, 0.0, 1.0).tolist()
 
-        # 2. Indices for extreme values
         max_idx = int(np.argmax(raw_similarities))
         min_idx = int(np.argmin(raw_similarities))
 
-        # 3. Target values
-        similarities = similarities_0_to_1
-        max_similarity = float(similarities_0_to_1[max_idx])
-        most_similar_class = str(text_classes[max_idx])
-        min_similarity = float(similarities_0_to_1[min_idx])
-        least_similar_class = str(text_classes[min_idx])
-
-        # 4. Classification predictions (ranked by highest similarity)
         classification_predictions = [
-            {"class": text_classes[i], "confidence": similarities_0_to_1[i]}
+            {"class": text_classes[i], "confidence": float(similarities_0_to_1[i])}
             for i in np.argsort(-raw_similarities)
         ]
 
-        self.metaData = {
-            "similarities": similarities,
-            "max_similarity": max_similarity,
-            "most_similar_class": most_similar_class,
-            "min_similarity": min_similarity,
-            "least_similar_class": least_similar_class,
+        metadata = {
+            "similarities": similarities_0_to_1,
+            "max_similarity": float(similarities_0_to_1[max_idx]),
+            "most_similar_class": str(text_classes[max_idx]),
+            "min_similarity": float(similarities_0_to_1[min_idx]),
+            "least_similar_class": str(text_classes[min_idx]),
             "classification_predictions": classification_predictions,
         }
 

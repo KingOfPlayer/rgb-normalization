@@ -66,6 +66,7 @@ class PerceptionEncoderSource(BaseEmbeddingSoruce):
         if normalize:
             image_embedding = image_embedding / image_embedding.norm(dim=-1, keepdim=True)
         
+        image_embedding = image_embedding.cpu().numpy().astype(float)
         return image_embedding
 
     def encode_text(self, input_text, normalize:bool = False):
@@ -77,4 +78,5 @@ class PerceptionEncoderSource(BaseEmbeddingSoruce):
         if normalize:
             text_embedding = text_embedding / text_embedding.norm(dim=-1, keepdim=True)
 
+        text_embedding = text_embedding.cpu().numpy().astype(float)
         return text_embedding

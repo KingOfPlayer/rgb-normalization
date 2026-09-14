@@ -19,7 +19,7 @@ from capsules.EmbeddingExtraction.src.models.PackageModel import (
 
 
 def build_clip_embedding_response(context):
-    outputEmbedding = OutputEmbedding(value=context.embedding)
+    outputEmbedding = OutputEmbedding(value=context.embedding.tolist())
     Outputs = ClipEmbeddingOutputs(outputEmbedding=outputEmbedding)
     packageResponse = ClipEmbeddingResponse(outputs=Outputs)
     packageExecutor = ClipEmbeddingExecutor(value=packageResponse)

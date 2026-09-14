@@ -34,12 +34,6 @@ class OpenClipSoruce(BaseEmbeddingSoruce):
         self.tokenizer = tokenizer.tokenize
         logger.info(f"(EmbeddingExtractor) OpenClip Model Loaded: {self.model_name} ")
 
-    def _convert_to_float_list(self, embedding_tensor):
-        if isinstance(embedding_tensor, torch.Tensor):
-            return embedding_tensor.cpu().numpy().tolist()
-        else:
-            raise TypeError("Input must be a torch.Tensor")
-
     def encode_image(self, input_image, normalize:bool = False):
         if isinstance(input_image, list):
             image_tensor = torch.stack([self.preprocess(img) for img in input_image]).to(self.device)
@@ -50,7 +44,7 @@ class OpenClipSoruce(BaseEmbeddingSoruce):
         if normalize:
             image_embedding = image_embedding / image_embedding.norm(dim=-1, keepdim=True)
         
-        image_embedding = self._convert_to_float_list(image_embedding)
+        image_embedding = image_embedding.cpu().numpy().astype(float)
         return image_embedding
 
     def encode_text(self, input_text, normalize:bool = False):
@@ -61,6 +55,6 @@ class OpenClipSoruce(BaseEmbeddingSoruce):
             text_embedding = self.model.encode_text(text_tokens)
         if normalize:
             text_embedding = text_embedding / text_embedding.norm(dim=-1, keepdim=True)
-
-        text_embedding = self._convert_to_float_list(text_embedding)
+        
+        text_embedding = text_embedding.cpu().numpy().astype(float)
         return text_embedding
