@@ -69,6 +69,8 @@ class ClipComparison(Component):
         text_embeddings = self.model.encode_text(text_classes, normalize=self.normalize)
 
         # 1. Compute raw similarities
+
+        # 1. Compute raw similarities
         raw_similarities = np.dot(text_embeddings, image_embedding.squeeze())
         similarities_0_to_1 = np.clip(raw_similarities, 0.0, 1.0).tolist()
 
@@ -83,14 +85,13 @@ class ClipComparison(Component):
         min_similarity = float(similarities_0_to_1[min_idx])
         least_similar_class = str(text_classes[min_idx])
 
-        # 4. Classification predictions (ranked or structured outputs)
-        # Common format: list of dicts with class name and confidence/similarity
+        # 4. Classification predictions (ranked by highest similarity)
         classification_predictions = [
             {"class": text_classes[i], "confidence": similarities_0_to_1[i]}
             for i in np.argsort(-raw_similarities)
         ]
 
-        self.metadata = {
+        self.metaData = {
             "similarities": similarities,
             "max_similarity": max_similarity,
             "most_similar_class": most_similar_class,
@@ -100,7 +101,7 @@ class ClipComparison(Component):
         }
 
     def run(self):
-        input_image = Image.get_frame(img=self.image, redis_db=self.redis_db)
+        input_image = Image.get_frame(img=self.input_image, redis_db=self.redis_db)
 
         self.compute_similarity(input_image=input_image, text_classes=self.classes)
 

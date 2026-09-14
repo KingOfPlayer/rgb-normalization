@@ -1,11 +1,11 @@
-from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingModel
+from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingSoruce
 import torch
 from sdks.novavision.src.base.logger import LoggerManager
 
 logger = LoggerManager()
 
-class OpenClipSoruce(BaseEmbeddingModel):
-    def Bootstrap(self):
+class OpenClipSoruce(BaseEmbeddingSoruce):
+    def _Bootstrap(self):
         global create_model_and_transforms, tokenizer
         # Install open_clip 
         try:
@@ -22,18 +22,17 @@ class OpenClipSoruce(BaseEmbeddingModel):
         
 
     def _load(self):
-        self.Bootstrap();
+        self._Bootstrap()
         logger.info(f"(EmbeddingExtractor) OpenClip Model Loading: {self.model_name} ")
         self.model, _, self.preprocess = create_model_and_transforms(
             model_name=self.model_name,
             pretrained=self.kwargs.get("pretrained", "openai"),
-            device=self.device,
+            device="cuda" if self.device.lower() == "gpu" and torch.cuda.is_available() else "cpu",
             cache_dir=self.cache_dir
         )
-        logger.info(f"(EmbeddingExtractor) OpenClip Model Loaded: {self.model_name} ")
         self.model.eval()
-
         self.tokenizer = tokenizer.tokenize
+        logger.info(f"(EmbeddingExtractor) OpenClip Model Loaded: {self.model_name} ")
 
     def _convert_to_float_list(self, embedding_tensor):
         if isinstance(embedding_tensor, torch.Tensor):

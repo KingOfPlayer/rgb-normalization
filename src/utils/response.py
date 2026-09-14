@@ -7,9 +7,9 @@ from capsules.EmbeddingExtraction.src.models.PackageModel import (
     ClipComparisonExecutor,
     ClipComparisonOutputs,
     ClipComparisonResponse,
-    PerceptionEncoderExecutor,
-    PerceptionEncoderOutputs,
-    PerceptionEncoderResponse,
+    PerceptionEncoderEmbeddingExecutor,
+    PerceptionEncoderEmbeddingOutputs,
+    PerceptionEncoderEmbeddingResponse,
     ConfigExecutor,
     OutputEmbedding,
     OutputMetadata,
@@ -31,7 +31,7 @@ def build_clip_embedding_response(context):
 
 
 def build_clip_comparison_response(context):
-    outputMetadata = OutputMetadata(value=context.similarity_results)
+    outputMetadata = OutputMetadata(value=context.metaData)
     Outputs = ClipComparisonOutputs(outputMetadata=outputMetadata)
     packageResponse = ClipComparisonResponse(outputs=Outputs)
     packageExecutor = ClipComparisonExecutor(value=packageResponse)
@@ -44,9 +44,9 @@ def build_clip_comparison_response(context):
 
 def build_perception_encoder_response(context):
     outputEmbedding = OutputEmbedding(value=context.embedding)
-    Outputs = PerceptionEncoderOutputs(outputEmbedding=outputEmbedding)
-    packageResponse = PerceptionEncoderResponse(outputs=Outputs)
-    packageExecutor = PerceptionEncoderExecutor(value=packageResponse)
+    Outputs = PerceptionEncoderEmbeddingOutputs(outputEmbedding=outputEmbedding)
+    packageResponse = PerceptionEncoderEmbeddingResponse(outputs=Outputs)
+    packageExecutor = PerceptionEncoderEmbeddingExecutor(value=packageResponse)
     executor = ConfigExecutor(value=packageExecutor)
     packageConfigs = PackageConfigs(executor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)

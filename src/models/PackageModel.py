@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import ConfigDict, field_validator, ValidationInfo
+from pydantic import ConfigDict, ValidationInfo, field_validator
 from sdks.novavision.src.base.model import (
     Config,
     Configs,
@@ -81,21 +81,6 @@ class BaseDependentDropdown(Config):
 
 
 # region List Of Models
-# title, value: <factory_name>_<model_name>
-OptionViTB16 = make_option("ViT-B-16", "OpenClip_ViT-B-16")
-OptionViTB32 = make_option("ViT-B-32", "OpenClip_ViT-B-32")
-OptionRN50 = make_option("RN50", "OpenClip_RN50")
-# endregion
-
-
-class BaseModels(BaseDropdown):
-    name: Literal["ModelName"] = "ModelName"
-    value: OptionViTB16 | OptionViTB32 | OptionRN50  # pyright: ignore
-
-    class Config:
-        title = "Model"
-
-
 class BaseNormalize(BaseDropdown):
     name: Literal["Normalize"] = "Normalize"
     value: ConfigDisable | ConfigEnable
@@ -168,11 +153,28 @@ class OutputMetadata(Output):
 # endregion
 
 # region Configs
+# region Clip Model List
+# title, value: <factory_name>_<model_name>
+OptionRN50 = make_option("RN50", "OpenClip_RN50")
+OptionViTB16 = make_option("ViT-B-16", "OpenClip_ViT-B-16")
+OptionViTB32 = make_option("ViT-B-32", "OpenClip_ViT-B-32")
+
+
+class ClipModels(BaseDropdown):
+    name: Literal["ModelName"] = "ModelName"
+    value: OptionRN50 | OptionViTB16 | OptionViTB32  # pyright: ignore
+
+    class Config:
+        title = "Model"
+
+
+# endregion
+
 # region ClipEmbedding
 
 
 class ConfigClipEmbeddingAdvanceEnable(ConfigEnable):
-    configClipEmbeddingModelName: BaseModels
+    configClipEmbeddingModelName: ClipModels
     configClipEmbeddingNormalize: BaseNormalize
     configClipEmbeddingDevice: BaseDevice
 
@@ -204,7 +206,7 @@ class ConfigClipComparisonClasses(Config):
 
 
 class ConfigClipComparisonAdvanceEnable(ConfigEnable):
-    configClipComparisonModelName: BaseModels
+    configClipComparisonModelName: ClipModels
     configClipComparisonClasses: ConfigClipComparisonClasses
     configClipComparisonDevice: BaseDevice
 
@@ -218,18 +220,34 @@ class ConfigClipComparisonAdvance(BaseDependentDropdown):
 
 
 # endregion
-# region PerceptionEncoder
+# region PerceptionEncoderEmbedding
+# region Clip Model List
+# title, value: <factory_name>_<model_name>
+OptionPECoreS16384 = make_option("PE-Core-S16-384", "PerceptionEncoderEmbedding_PE-Core-S16-384")
+OptionPECoreB162246 = make_option("PE-Core-B16-224", "PerceptionEncoderEmbedding_PE-Core-B16-224")
+OptionPECoreL14336 = make_option("PE-Core-L14-336", "PerceptionEncoderEmbedding_PE-Core-L14-336")
 
 
-class ConfigPerceptionEncoderAdvanceEnable(ConfigEnable):
-    configPerceptionEncoderModelName: BaseModels
-    configPerceptionEncoderNormalize: BaseNormalize
-    configPerceptionEncoderDevice: BaseDevice
+class PerceptionEncoderEmbeddingModels(BaseDropdown):
+    name: Literal["ModelName"] = "ModelName"
+    value: OptionPECoreS16384 | OptionPECoreB162246 | OptionPECoreL14336  # pyright: ignore
+
+    class Config:
+        title = "Model"
 
 
-class ConfigPerceptionEncoderAdvance(BaseDependentDropdown):
+# endregion
+
+
+class ConfigPerceptionEncoderEmbeddingAdvanceEnable(ConfigEnable):
+    configPerceptionEncoderEmbeddingModelName: PerceptionEncoderEmbeddingModels
+    configPerceptionEncoderEmbeddingNormalize: BaseNormalize
+    configPerceptionEncoderEmbeddingDevice: BaseDevice
+
+
+class ConfigPerceptionEncoderEmbeddingAdvance(BaseDependentDropdown):
     name: Literal["Advance"] = "Advance"
-    value: ConfigPerceptionEncoderAdvanceEnable | ConfigDisable
+    value: ConfigPerceptionEncoderEmbeddingAdvanceEnable | ConfigDisable
 
     class Config:
         title = "Advance"
@@ -265,16 +283,16 @@ class ClipComparisonConfigs(Configs):
     configClipComparisonAdvance: ConfigClipComparisonAdvance
 
 
-class PerceptionEncoderInputs(Inputs):
+class PerceptionEncoderEmbeddingInputs(Inputs):
     inputData: InputData
 
 
-class PerceptionEncoderOutputs(Outputs):
+class PerceptionEncoderEmbeddingOutputs(Outputs):
     outputEmbedding: OutputEmbedding
 
 
-class PerceptionEncoderConfigs(Configs):
-    configPerceptionEncoderAdvance: ConfigPerceptionEncoderAdvance
+class PerceptionEncoderEmbeddingConfigs(Configs):
+    configPerceptionEncoderEmbeddingAdvance: ConfigPerceptionEncoderEmbeddingAdvance
 
 
 # endregion
@@ -306,16 +324,16 @@ class ClipComparisonResponse(Response):
     outputs: ClipComparisonOutputs
 
 
-class PerceptionEncoderRequest(Request):
-    inputs: PerceptionEncoderInputs
-    configs: PerceptionEncoderConfigs
+class PerceptionEncoderEmbeddingRequest(Request):
+    inputs: PerceptionEncoderEmbeddingInputs
+    configs: PerceptionEncoderEmbeddingConfigs
 
     class Config:
         json_schema_extra = {"target": "configs"}
 
 
-class PerceptionEncoderResponse(Response):
-    outputs: PerceptionEncoderOutputs
+class PerceptionEncoderEmbeddingResponse(Response):
+    outputs: PerceptionEncoderEmbeddingOutputs
 
 
 # endregion
@@ -345,14 +363,14 @@ class ClipComparisonExecutor(Config):
         json_schema_extra = {"target": {"value": 0}}
 
 
-class PerceptionEncoderExecutor(Config):
-    name: Literal["PerceptionEncoder"] = "PerceptionEncoder"
-    value: PerceptionEncoderRequest | PerceptionEncoderResponse
+class PerceptionEncoderEmbeddingExecutor(Config):
+    name: Literal["PerceptionEncoderEmbedding"] = "PerceptionEncoderEmbedding"
+    value: PerceptionEncoderEmbeddingRequest | PerceptionEncoderEmbeddingResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Perception Encoder"
+        title = "Perception Encoder Embedding"
         json_schema_extra = {"target": {"value": 0}}
 
 
@@ -363,7 +381,11 @@ class PerceptionEncoderExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: ClipEmbeddingExecutor | ClipComparisonExecutor | PerceptionEncoderExecutor
+    value: (
+        ClipEmbeddingExecutor
+        | ClipComparisonExecutor
+        | PerceptionEncoderEmbeddingExecutor
+    )
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 

@@ -4,7 +4,7 @@ from typing import Any
 from PIL import Image
 
 
-class BaseEmbeddingModel(ABC):
+class BaseEmbeddingSoruce(ABC):
     def __init__(self, model_name: str, device: str, cache_dir:str, **kwargs):
         self.model_name = model_name
         self.device = device
