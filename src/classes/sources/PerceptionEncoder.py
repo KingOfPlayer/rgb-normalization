@@ -1,6 +1,8 @@
-from src.classes.ModelSource import BaseEmbeddingSoruce
+from capsules.EmbeddingExtraction.src.classes.ModelSource import BaseEmbeddingSoruce
 import torch
+from sdks.novavision.src.base.logger import LoggerManager
 
+logger = LoggerManager()
 
 class PerceptionEncoderSource(BaseEmbeddingSoruce):
     def _bootstrap(self):
@@ -12,23 +14,24 @@ class PerceptionEncoderSource(BaseEmbeddingSoruce):
             #Clone the repository depth 1 to the cache_dir
             repo_url = "https://github.com/facebookresearch/perception_models.git"
             try: 
-                print(f"Cloning the repository {repo_url} into {self.cache_dir}")
+                logger.warning("(EmbeddingExtractor) Cloning Perception Encoder Repository")
                 subprocess.run(["git", "clone", "--depth", "1", repo_url, str(self.cache_dir)], check=True)
             except subprocess.CalledProcessError as e:
                 raise RuntimeError(f"Failed to clone the repository: {e}")
         
         libs_dir = self.cache_dir / "libs"
-        """ if requirements_path.exists():
+        requirements_path = self.cache_dir / "requirements.txt"
+        if requirements_path.exists():
             try:
+                logger.warning(f"(EmbeddingExtractor) Installing dependencies from requirements")
                 subprocess.run([sys.executable, "-m", "pip", "install", "-r", str(self.cache_dir / "requirements.txt"), "--target", str(libs_dir)], check=True)
             except subprocess.CalledProcessError as e:
                 raise RuntimeError(f"Failed to install dependencies from requirements.txt: {e}")
         else:
-            raise FileNotFoundError(f"requirements.txt not found") """
+            raise FileNotFoundError("requirements.txt not found")
         
         sys.path.append(str(self.cache_dir))
         sys.path.append(str(libs_dir))
-        print(f"Library ready to use.")
 
     def _load(self):
         self._bootstrap()
@@ -39,21 +42,20 @@ class PerceptionEncoderSource(BaseEmbeddingSoruce):
 
         self.model_cache = str(self.cache_dir / "checkpoints")
 
-        print(f"(PerceptionEncoderEmbedding) Downloading PerceptionEncoderEmbedding model checkpoint: {self.model_name}")
+        print(f"(EmbeddingExtractor) Downloading PerceptionEncoder model checkpoint: {self.model_name}")
         hf_hub_download(
             repo_id=f"facebook/{self.model_name}",
             filename= self.model_name + ".pt",
             local_dir=self.model_cache,
         )
-        print(f"(PerceptionEncoderEmbedding) Downloaded model checkpoint: {self.model_name}")
-        print(f"(PerceptionEncoderEmbedding) Loading PerceptionEncoderEmbedding model: {self.model_name}")
+        print(f"(EmbeddingExtractor) Loading PerceptionEncoder model: {self.model_name}")
         self.model = pe.CLIP.from_config("PE-Core-B16-224", pretrained=True, checkpoint_path=str(self.cache_dir / "checkpoints" / str(self.model_name + ".pt")))
         self.model = self.model.to("cuda" if self.device.lower() == "gpu" and torch.cuda.is_available() else "cpu")
         self.model.eval()
 
         self.preprocess = transforms.get_image_transform(self.model.image_size)
         self.tokenizer = transforms.get_text_tokenizer(self.model.context_length)
-        print(f"(PerceptionEncoderEmbedding) Loaded PerceptionEncoderEmbedding model: {self.model_name}")
+        print(f"(EmbeddingExtractor) Loaded PerceptionEncoder model: {self.model_name}")
         
 
     def encode_image(self, input_image, normalize:bool = False):

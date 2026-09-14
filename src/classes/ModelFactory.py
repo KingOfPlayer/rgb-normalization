@@ -10,7 +10,7 @@ class ModelFactory:
             return OpenClipSoruce(model_name=model_name, device=device, cache_dir=base_cache_path / "OpenClip",  **kwargs)
         if factory_name.startswith("PerceptionEncoder"):
             """ from capsules.EmbeddingExtraction.src.classes.sources.PerceptionEncoder import PerceptionEncoderSource """
-            from src.classes.sources.PerceptionEncoder import PerceptionEncoderSource
+            from capsules.EmbeddingExtraction.src.classes.sources.PerceptionEncoder import PerceptionEncoderSource
             return PerceptionEncoderSource(model_name=model_name, device=device, cache_dir=base_cache_path / "PerceptionEncoder",  **kwargs)
         # For feature expansion, you can add more model sources here. For example:
         #if source_name == "<name_of_another_model_source>":

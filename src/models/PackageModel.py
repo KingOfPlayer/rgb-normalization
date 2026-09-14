@@ -223,9 +223,15 @@ class ConfigClipComparisonAdvance(BaseDependentDropdown):
 # region PerceptionEncoderEmbedding
 # region Clip Model List
 # title, value: <factory_name>_<model_name>
-OptionPECoreS16384 = make_option("PE-Core-S16-384", "PerceptionEncoderEmbedding_PE-Core-S16-384")
-OptionPECoreB162246 = make_option("PE-Core-B16-224", "PerceptionEncoderEmbedding_PE-Core-B16-224")
-OptionPECoreL14336 = make_option("PE-Core-L14-336", "PerceptionEncoderEmbedding_PE-Core-L14-336")
+OptionPECoreS16384 = make_option(
+    "PE-Core-S16-384", "PerceptionEncoderEmbedding_PE-Core-S16-384"
+)
+OptionPECoreB162246 = make_option(
+    "PE-Core-B16-224", "PerceptionEncoderEmbedding_PE-Core-B16-224"
+)
+OptionPECoreL14336 = make_option(
+    "PE-Core-L14-336", "PerceptionEncoderEmbedding_PE-Core-L14-336"
+)
 
 
 class PerceptionEncoderEmbeddingModels(BaseDropdown):

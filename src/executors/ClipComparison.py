@@ -16,6 +16,7 @@ from sdks.novavision.src.helper.executor import Executor
 from capsules.EmbeddingExtraction.src.utils.response import (
     build_clip_comparison_response,
 )
+from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
 from sdks.novavision.src.base.application import Application
 
@@ -28,8 +29,6 @@ class ClipComparison(Component):
         # 1. Extract Inputs
         self.input_image = self.request.get_param("inputImage")
 
-        # 2. Extract Configs
-        self.normalize = self.request.get_param("Normalize") or False
         # Parse text list classes from widget
         raw_classes = self.request.get_param("Classes") or ""
         if isinstance(raw_classes, str):
@@ -44,20 +43,7 @@ class ClipComparison(Component):
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        bootstrap = {}
-        application = Application()
-
-        model_name = (
-            application.get_param(config=config, name="ModelName") or "ViT-B-16"
-        )
-        device = application.get_param(config=config, name="Device") or "gpu"
-
-        # Model initializationclasses
-        from capsules.EmbeddingExtraction.src.classes.ModelFactory import ModelFactory
-
-        bootstrap["model"] = ModelFactory.get_model(model_name, device)
-
-        return bootstrap
+        return build_bootstrap(config=config, default_model_name="OpenClip_ViT-B-16")
 
     def compute_similarity(self, input_image, text_classes):
 
@@ -65,8 +51,8 @@ class ClipComparison(Component):
         input_image = PILImage.fromarray(input_image)
 
         # Compute Comparison Embedding
-        image_embedding = self.model.encode_image(input_image, normalize=self.normalize)
-        text_embeddings = self.model.encode_text(text_classes, normalize=self.normalize)
+        image_embedding = self.model.encode_image(input_image, normalize=True)
+        text_embeddings = self.model.encode_text(text_classes, normalize=True)
 
         raw_similarities = np.dot(text_embeddings, image_embedding.squeeze())
         similarities_0_to_1 = np.clip(raw_similarities, 0.0, 1.0).tolist()
@@ -79,7 +65,7 @@ class ClipComparison(Component):
             for i in np.argsort(-raw_similarities)
         ]
 
-        metadata = {
+        self.metaData = {
             "similarities": similarities_0_to_1,
             "max_similarity": float(similarities_0_to_1[max_idx]),
             "most_similar_class": str(text_classes[max_idx]),

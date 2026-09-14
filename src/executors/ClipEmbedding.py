@@ -10,8 +10,8 @@ from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
 from capsules.EmbeddingExtraction.src.utils.response import build_clip_embedding_response
+from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
-from sdks.novavision.src.base.application import Application
 
 
 class ClipEmbedding(Component):
@@ -30,20 +30,7 @@ class ClipEmbedding(Component):
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        bootstrap = {}
-        application = Application()
-
-        model_name = (
-            application.get_param(config=config, name="ModelName") or "ViT-B-16"
-        )
-        device = application.get_param(config=config, name="Device") or "gpu"
-
-        # Model initializationclasses
-        from capsules.EmbeddingExtraction.src.classes.ModelFactory import ModelFactory
-
-        bootstrap["model"] = ModelFactory.get_model(model_name, device)
-
-        return bootstrap
+        return build_bootstrap(config=config, default_model_name="OpenClip_ViT-B-16")
 
     def run(self):
         if bool(isinstance(self.input_data, dict)):

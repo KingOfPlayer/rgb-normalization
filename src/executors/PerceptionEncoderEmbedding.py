@@ -11,44 +11,29 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../'))
 from sdks.novavision.src.media.image import Image
 from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
-from capsules.EmbeddingExtraction.src.utils.response import build_response
+from capsules.EmbeddingExtraction.src.utils.response import build_perception_encoder_response
+from capsules.EmbeddingExtraction.src.utils.utils import build_bootstrap
 from capsules.EmbeddingExtraction.src.models.PackageModel import PackageModel
 from sdks.novavision.src.base.application import Application
 
 
-class PerceptionEncoder(Component):
+class PerceptionEncoderEmbedding(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
 
-        # 1. Extract Inputs
+        # Inputs
         self.input_data = self.request.get_param("inputData")
 
-        # 2. Extract Configs
-        self.advance = self.request.get_param("Advance")
-        self.is_advance = bool(self.advance) if self.advance is not None else False
+        # Configs
+        self.normalize = self.request.get_param("Normalize") or False
 
-        self.model_name = self.request.get_param("ModelName") or "ViT-B-16"
-        self.normalize = bool(self.request.get_param("Normalize")) if self.request.get_param("Normalize") is not None else True
-        self.device = self.request.get_param("Device") or "gpu"
-
-        # 3. Pull Preloaded Assets from Bootstrap
+        # Model
         self.model = self.bootstrap.get("model")
-        self.processor = self.bootstrap.get("processor")
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        bootstrap = {}
-        application = Application()
-
-        model_name = application.get_param(config=config, name="ModelName") or "ViT-B-16"
-        device = application.get_param(config=config, name="Device") or "gpu"
-
-        # Model initialization logic
-        # bootstrap["model"] = load_perception_model(model_name=model_name, device=device)
-        # bootstrap["processor"] = load_perception_processor(model_name=model_name)
-
-        return bootstrap
+        return build_bootstrap(config=config, default_model_name="PerceptionEncoderEmbedding_PE-Core-B16-224")
 
     def rotation(self, image):
         if self.keep_side == True:
@@ -76,7 +61,7 @@ class PerceptionEncoder(Component):
         img = Image.get_frame(img=self.image, redis_db=self.redis_db)
         img.value = self.rotation(img.value)
         self.image = Image.set_frame(img=img, package_uID=self.uID, redis_db=self.redis_db)
-        packageModel = build_response(context=self)
+        packageModel = build_perception_encoder_response(context=self)
         return packageModel
 
 
