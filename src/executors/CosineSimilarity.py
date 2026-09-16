@@ -7,8 +7,8 @@ from sdks.novavision.src.base.component import Component
 from sdks.novavision.src.helper.executor import Executor
 
 try:
-    from components.CosineSimilarity.src.utils.response import build_response
-    from components.CosineSimilarity.src.models.PackageModel import PackageModel
+    from components.ErkanTestPackage.src.utils.response import build_response
+    from components.ErkanTestPackage.src.models.PackageModel import PackageModel
 except ModuleNotFoundError:
     # Update aşamasında klasör adı değişirse diye güvenlik ağı
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -16,15 +16,14 @@ except ModuleNotFoundError:
     from src.models.PackageModel import PackageModel
 
 import numpy as np
-import traceback
 
 
 class CosineSimilarity(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.embedding_1 = self.request.get_param("embedding_1")
-        self.embedding_2 = self.request.get_param("embedding_2")
+        self.embedding_1 = self.request.get_param("embedding1")
+        self.embedding_2 = self.request.get_param("embedding2")
         self.similarity = 0.0
 
     @staticmethod

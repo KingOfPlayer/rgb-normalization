@@ -2,28 +2,23 @@ from pydantic import Field
 from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
-
-class InputEmbedding1(Input):
-    name: Literal["embedding_1"] = "embedding_1"
-    value: List[float] = Field(..., description="Embedding vector 1", min_items=1)
+class BaseEmbeddingInput(Input):
+    value: list[float]
     type: Literal["list"] = "list"
 
     class Config:
-        title = "Embedding 1"
+        title = "Embedding"
+        
 
+class InputEmbedding1(BaseEmbeddingInput):
+    name: Literal["embedding1"] = "embedding1"
 
-class InputEmbedding2(Input):
-    name: Literal["embedding_2"] = "embedding_2"
-    value: List[float] = Field(..., description="Embedding vector 2", min_items=1)
-    type: Literal["list"] = "list"
-
-    class Config:
-        title = "Embedding 2"
-
+class InputEmbedding2(BaseEmbeddingInput):
+    name: Literal["embedding2"] = "embedding2"
 
 class OutputSimilarity(Output):
     name: Literal["similarity"] = "similarity"
-    value: float = Field(..., ge=-1.0, le=1.0, description="Cosine similarity score")
+    value: float
     type: Literal["number"] = "number"
 
     class Config:
@@ -31,8 +26,8 @@ class OutputSimilarity(Output):
 
 
 class CosineSimilarityInputs(Inputs):
-    embedding_1: InputEmbedding1
-    embedding_2: InputEmbedding2
+    embedding1: InputEmbedding1
+    embedding2: InputEmbedding2
 
 
 class CosineSimilarityOutputs(Outputs):
@@ -40,7 +35,7 @@ class CosineSimilarityOutputs(Outputs):
 
 
 class CosineSimilarityRequest(Request):
-    inputs: Optional[CosineSimilarityInputs]
+    inputs: CosineSimilarityInputs
 
 
 class CosineSimilarityResponse(Response):
@@ -49,7 +44,7 @@ class CosineSimilarityResponse(Response):
 
 class CosineSimilarityExecutor(Config):
     name: Literal["CosineSimilarity"] = "CosineSimilarity"
-    value: Union[CosineSimilarityRequest, CosineSimilarityResponse]
+    value: CosineSimilarityRequest | CosineSimilarityResponse
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
@@ -64,7 +59,7 @@ class CosineSimilarityExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[CosineSimilarityExecutor]
+    value: CosineSimilarityExecutor
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -82,4 +77,4 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["CosineSimilarity"] = "CosineSimilarity"
+    name: Literal["ErkanTestPackage"] = "ErkanTestPackage"

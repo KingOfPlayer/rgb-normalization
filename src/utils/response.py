@@ -1,27 +1,6 @@
 from sdks.novavision.src.helper.package import PackageHelper
-try:
-    from components.CosineSimilarity.src.models.PackageModel import (
-        PackageModel, 
-        PackageConfigs, 
-        ConfigExecutor, 
-        CosineSimilarityOutputs, 
-        CosineSimilarityResponse, 
-        CosineSimilarityExecutor, 
-        OutputSimilarity
-    )
-except ModuleNotFoundError:
-    import os
-    import sys
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-    from src.models.PackageModel import (
-        PackageModel, 
-        PackageConfigs, 
-        ConfigExecutor, 
-        CosineSimilarityOutputs, 
-        CosineSimilarityResponse, 
-        CosineSimilarityExecutor, 
-        OutputSimilarity
-    )
+from components.ErkanTestPackage.src.models.PackageModel import PackageModel, PackageConfigs, ConfigExecutor, CosineSimilarityOutputs, CosineSimilarityResponse, CosineSimilarityExecutor, OutputSimilarity
+    
 
 def build_response(context):
     outputSimilarity = OutputSimilarity(value=context.similarity)
