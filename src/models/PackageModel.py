@@ -1,125 +1,60 @@
-
-from pydantic import Field, validator
+from pydantic import Field
 from typing import List, Optional, Union, Literal
-from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
+from sdks.novavision.src.base.model import Package, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
-class InputImage(Input):
-    name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
+class InputEmbedding1(Input):
+    name: Literal["embedding_1"] = "embedding_1"
+    value: List[float] = Field(..., description="Embedding vector 1", min_items=1)
+    type: Literal["list"] = "list"
 
     class Config:
-        title = "Image"
+        title = "Embedding 1"
 
 
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
-    type: str = "object"
-
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
+class InputEmbedding2(Input):
+    name: Literal["embedding_2"] = "embedding_2"
+    value: List[float] = Field(..., description="Embedding vector 2", min_items=1)
+    type: Literal["list"] = "list"
 
     class Config:
-        title = "Image"
+        title = "Embedding 2"
 
 
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
-
-class KeepSideTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
-
-
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
-    name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Keep Sides"
-
-
-class Degree(Config):
-    """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
-    """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
+class OutputSimilarity(Output):
+    name: Literal["similarity"] = "similarity"
+    value: float = Field(..., ge=-1.0, le=1.0, description="Cosine similarity score")
     type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
 
     class Config:
-        title = "Angle"
+        title = "Similarity"
 
 
-class PackageInputs(Inputs):
-    inputImage: InputImage
+class CosineSimilarityInputs(Inputs):
+    embedding_1: InputEmbedding1
+    embedding_2: InputEmbedding2
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+class CosineSimilarityOutputs(Outputs):
+    similarity: OutputSimilarity
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
+class CosineSimilarityRequest(Request):
+    inputs: Optional[CosineSimilarityInputs]
 
 
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
-
-    class Config:
-        json_schema_extra = {
-            "target": "configs"
-        }
+class CosineSimilarityResponse(Response):
+    outputs: CosineSimilarityOutputs
 
 
-class PackageResponse(Response):
-    outputs: PackageOutputs
-
-
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class CosineSimilarityExecutor(Config):
+    name: Literal["CosineSimilarity"] = "CosineSimilarity"
+    value: Union[CosineSimilarityRequest, CosineSimilarityResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Package"
+        title = "Cosine Similarity"
         json_schema_extra = {
             "target": {
                 "value": 0
@@ -129,7 +64,7 @@ class PackageExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[CosineSimilarityExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -147,4 +82,4 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["DemoPackge"] = "DemoPackge"
+    name: Literal["CosineSimilarity"] = "CosineSimilarity"

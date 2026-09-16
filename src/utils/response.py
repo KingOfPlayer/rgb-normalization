@@ -1,13 +1,33 @@
-
 from sdks.novavision.src.helper.package import PackageHelper
-from components.Package.src.models.PackageModel import PackageModel, PackageConfigs, ConfigExecutor, PackageOutputs, PackageResponse, PackageExecutor, OutputImage
-
+try:
+    from components.CosineSimilarity.src.models.PackageModel import (
+        PackageModel, 
+        PackageConfigs, 
+        ConfigExecutor, 
+        CosineSimilarityOutputs, 
+        CosineSimilarityResponse, 
+        CosineSimilarityExecutor, 
+        OutputSimilarity
+    )
+except ModuleNotFoundError:
+    import os
+    import sys
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from src.models.PackageModel import (
+        PackageModel, 
+        PackageConfigs, 
+        ConfigExecutor, 
+        CosineSimilarityOutputs, 
+        CosineSimilarityResponse, 
+        CosineSimilarityExecutor, 
+        OutputSimilarity
+    )
 
 def build_response(context):
-    outputImage = OutputImage(value=context.image)
-    Outputs = PackageOutputs(outputImage=outputImage)
-    packageResponse = PackageResponse(outputs=Outputs)
-    packageExecutor = PackageExecutor(value=packageResponse)
+    outputSimilarity = OutputSimilarity(value=context.similarity)
+    Outputs = CosineSimilarityOutputs(similarity=outputSimilarity)
+    packageResponse = CosineSimilarityResponse(outputs=Outputs)
+    packageExecutor = CosineSimilarityExecutor(value=packageResponse)
     executor = ConfigExecutor(value=packageExecutor)
     packageConfigs = PackageConfigs(executor=executor)
     package = PackageHelper(packageModel=PackageModel, packageConfigs=packageConfigs)
